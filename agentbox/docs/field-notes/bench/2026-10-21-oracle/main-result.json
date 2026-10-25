@@ -1,0 +1,118 @@
+{
+  "label": "main",
+  "planted": [],
+  "tests_passed": true,
+  "seconds": 81,
+  "line": "Outline checks: 48 pass, 0 fail \u00b7 1 import(s) of names that don't exist \u00b7 Mutation check: tests caught 33/40 planted errors",
+  "passed": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "C9",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "C17",
+    "C18",
+    "C19",
+    "C20",
+    "C21",
+    "C22",
+    "C23",
+    "C24",
+    "C25",
+    "C26",
+    "C27",
+    "C28",
+    "C29",
+    "C30",
+    "C31",
+    "C32",
+    "C33",
+    "C34",
+    "C35",
+    "C36",
+    "C37",
+    "C38",
+    "C39",
+    "C40",
+    "C41",
+    "C42",
+    "C43",
+    "C44",
+    "C45",
+    "C46",
+    "C47",
+    "C48"
+  ],
+  "failed": [],
+  "dangling": [
+    "src/mechcalc/beams.py:24 imports Section from mechcalc.sections, which does not define it"
+  ],
+  "mutation": {
+    "sites": 186,
+    "tested": 40,
+    "killed": 33,
+    "timeouts": 0,
+    "survived": [
+      {
+        "file": "src/mechcalc/cli.py",
+        "line": 65,
+        "change": "`/` -> `*`",
+        "code": "f\"{key:<25} {mat.name:<35} {mat.E:<15.2e} {mat.yield_strength / 1e6:<13.2f} {mat.density}\""
+      },
+      {
+        "file": "src/mechcalc/sections.py",
+        "line": 128,
+        "change": "`<=` -> `<`",
+        "code": "if self.outer_d <= 0:"
+      },
+      {
+        "file": "src/mechcalc/sections.py",
+        "line": 192,
+        "change": "`<=` -> `<`",
+        "code": "if self.tf <= 0:"
+      },
+      {
+        "file": "src/mechcalc/sections.py",
+        "line": 196,
+        "change": "`2` -> `3`",
+        "code": "if 2 * self.tf >= self.h:"
+      },
+      {
+        "file": "src/mechcalc/beams.py",
+        "line": 139,
+        "change": "`0` -> `1`",
+        "code": "if max_moment == 0:"
+      },
+      {
+        "file": "src/mechcalc/cli.py",
+        "line": 290,
+        "change": "`2` -> `3`",
+        "code": "return 2"
+      },
+      {
+        "file": "src/mechcalc/cli.py",
+        "line": 279,
+        "change": "`2` -> `3`",
+        "code": "code = exc.code if exc.code is not None else 2"
+      }
+    ],
+    "baseline": "survived",
+    "seconds": 66.2
+  },
+  "test_tail": [
+    "........................................................................ [ 54%]",
+    "............................................................             [100%]",
+    "132 passed in 0.70s"
+  ]
+}

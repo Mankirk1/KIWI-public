@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.cache/
+*.log
+.env
+.env.*
+*.sqlite3
+*.db
+.DS_Store

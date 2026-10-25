@@ -1,0 +1,24 @@
+# Domains the sandbox may reach (one per line; a leading dot includes subdomains).
+# After editing:  docker compose restart egress-proxy
+
+# GitHub API (used by the GitHub MCP server with the read-only token)
+api.github.com
+
+# Python packages
+pypi.org
+files.pythonhosted.org
+
+# Node packages
+registry.npmjs.org
+registry.yarnpkg.com
+
+# Some packages download release binaries from GitHub (e.g. esbuild, playwright is NOT included)
+codeload.github.com
+objects.githubusercontent.com
+release-assets.githubusercontent.com
+
+# Uncomment if your projects use these ecosystems (and add the toolchain to worker/Dockerfile)
+# proxy.golang.org
+# sum.golang.org
+# index.crates.io
+# static.crates.io

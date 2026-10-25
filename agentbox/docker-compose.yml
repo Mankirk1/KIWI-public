@@ -1,0 +1,45 @@
+# agentbox infrastructure: model server + egress proxy + the two networks.
+#   docker compose up -d          start (and keep running across reboots)
+#   docker compose logs -f llama-swap
+# Workers and test runners are NOT defined here: the orchestrator starts a fresh
+# container for every attempt on the `agentbox-internal` network.
+name: agentbox
+
+services:
+  llama-swap:
+    image: ${LLAMA_SWAP_IMAGE:-ghcr.io/mostlygeek/llama-swap:unified-cuda}
+    container_name: agentbox-llama-swap
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${LLAMA_SWAP_PORT:-8080}:8080"   # only reachable from this machine
+    volumes:
+      - ${MODELS_DIR:-./models}:/models:ro
+      - ./llama-swap/config.yaml:/etc/llama-swap/config/config.yaml:ro
+    environment:
+      LLAMA_SWAP_LISTEN: "0.0.0.0:8080"
+      LLAMA_SWAP_WATCH_CONFIG: "true"
+    networks: [internal, egress]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  egress-proxy:
+    image: ubuntu/squid:latest
+    container_name: agentbox-egress-proxy
+    restart: unless-stopped
+    volumes:
+      - ./proxy/squid.conf:/etc/squid/squid.conf:ro
+      - ./proxy/allowlist.txt:/etc/squid/allowlist.txt:ro
+    networks: [internal, egress]
+
+networks:
+  # Sandboxes live here: no route to the internet, only to llama-swap and the proxy.
+  internal:
+    name: agentbox-internal
+    internal: true
+  egress:
+    name: agentbox-egress

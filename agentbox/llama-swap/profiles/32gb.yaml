@@ -1,0 +1,48 @@
+# llama-swap profile "32gb" - Dell XPS 15 9530 with RTX 4050/4060/4070 (6-8 GB VRAM) and 32 GB RAM.
+#
+#   qwen-coder      Qwen3.6-35B-A3B  UD-IQ4_XS  (17.7 GB)  planner + coder
+#   gemma-reviewer  Gemma 4 26B-A4B  UD-IQ4_XS  (13.6 GB)  plan critic + code reviewer
+#
+# Both are mixture-of-experts models with ~3-4B active parameters per token, so they run
+# acceptably with the expert weights in system RAM (--cpu-moe) and attention + KV cache on
+# the GPU. Only one model is loaded at a time (llama-swap swaps on demand, ~10-30 s).
+#
+# Edit, then: docker compose restart llama-swap   (or just save - the config is watched)
+
+healthCheckTimeout: 900        # first load of a 17 GB file from disk can be slow
+logLevel: info
+logToStdout: both
+startPort: 10001
+globalTTL: 0
+
+macros:
+  llama_bin: "llama-server"
+  # 13th-gen H-series CPUs have 6 performance cores; MoE decode on CPU is memory-bound,
+  # so more threads than this rarely helps. Tune with `agentctl doctor` timings.
+  common: >-
+    ${llama_bin} --host 127.0.0.1 --port ${PORT}
+    --jinja --flash-attn on
+    --cache-type-k q8_0 --cache-type-v q8_0
+    --parallel 1 --threads 6 --threads-batch 12
+    --n-gpu-layers 99 --metrics
+
+models:
+  qwen-coder:
+    name: "Qwen3.6-35B-A3B (UD-IQ4_XS) - planner/coder"
+    cmd: |
+      ${common}
+      --model /models/Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
+      --alias qwen-coder
+      --ctx-size 49152
+      --cpu-moe
+      --temp 0.6 --top-p 0.95 --top-k 20 --min-p 0.0
+
+  gemma-reviewer:
+    name: "Gemma 4 26B-A4B (UD-IQ4_XS) - reviewer"
+    cmd: |
+      ${common}
+      --model /models/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
+      --alias gemma-reviewer
+      --ctx-size 32768
+      --cpu-moe
+      --temp 1.0 --top-p 0.95 --top-k 64

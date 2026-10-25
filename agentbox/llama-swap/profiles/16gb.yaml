@@ -1,0 +1,47 @@
+# llama-swap profile "16gb" - XPS 15 9530 with only 16 GB RAM (any GPU).
+#
+#   qwen-coder      Qwen3.5-9B        Q4_K_M  (5.7 GB)   planner + coder
+#   gemma-reviewer  Gemma 4 E4B-it    Q4_K_M  (4.6 GB)   plan critic + code reviewer
+#
+# These small dense models fit (almost) entirely in 8 GB of VRAM, which keeps them fast,
+# but they are much weaker at multi-step coding than the 35B MoE. Expect simpler projects
+# and more `agent:needs-human` issues. Upgrading to 32 or 64 GB of RAM (two SO-DIMM slots)
+# is the single best improvement for this machine.
+#
+# RTX 4050 (6 GB): change --n-gpu-layers 99 to 28 for qwen-coder if it fails to load.
+# Intel Arc A370M: use the CPU override (see GUIDE.md) and expect ~5-8 tokens/s.
+
+healthCheckTimeout: 600
+logLevel: info
+logToStdout: both
+startPort: 10001
+globalTTL: 0
+
+macros:
+  llama_bin: "llama-server"
+  common: >-
+    ${llama_bin} --host 127.0.0.1 --port ${PORT}
+    --jinja --flash-attn on
+    --cache-type-k q8_0 --cache-type-v q8_0
+    --parallel 1 --threads 6 --threads-batch 12 --metrics
+
+models:
+  qwen-coder:
+    name: "Qwen3.5-9B (Q4_K_M) - planner/coder"
+    cmd: |
+      ${common}
+      --model /models/Qwen3.5-9B-Q4_K_M.gguf
+      --alias qwen-coder
+      --ctx-size 32768
+      --n-gpu-layers 99
+      --temp 0.6 --top-p 0.95 --top-k 20 --min-p 0.0
+
+  gemma-reviewer:
+    name: "Gemma 4 E4B (Q4_K_M) - reviewer"
+    cmd: |
+      ${common}
+      --model /models/gemma-4-E4B-it-Q4_K_M.gguf
+      --alias gemma-reviewer
+      --ctx-size 32768
+      --n-gpu-layers 99
+      --temp 1.0 --top-p 0.95 --top-k 64

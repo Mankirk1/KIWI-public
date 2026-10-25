@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentbox-worker"
+version = "1.0.0"
+description = "Sandboxed coding agent used by agentbox (runs inside Docker)"
+requires-python = ">=3.10"
+dependencies = ["mcp>=1.10,<3"]
+
+[tool.setuptools.packages.find]
+include = ["agentbox_worker*"]

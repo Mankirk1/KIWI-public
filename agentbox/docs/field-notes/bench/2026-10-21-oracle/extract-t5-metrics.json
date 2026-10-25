@@ -1,0 +1,21 @@
+{
+  "seconds": 406,
+  "t5_checks": [
+    "`mechcalc materials`: exit 0, stdout is readable text, not JSON",
+    "`mechcalc materials --json`: exit 0, stdout is one JSON object",
+    "`mechcalc section rect --b 0.05 --h 0.1`: exit 0, stdout is readable text, not JSON",
+    "`mechcalc section rect --b 0.05 --h 0.1 --json`: exit 0, stdout is one JSON object",
+    "`mechcalc beam --support cantilever --load point --length 2 --magnitude 1000 --material steel-a36 rect --b 0.05 --h 0.1`: exit 0, stdout is readable text, not JSON",
+    "`mechcalc beam --support cantilever --load point --length 2 --magnitude 1000 --material steel-a36 rect --b 0.05 --h 0.1 --json`: exit 0, stdout is one JSON object",
+    "`mechcalc invalid_command`: exit 2, stdout is empty, 1 line(s) on stderr",
+    "`mechcalc section rect --b -0.05 --h 0.1`: exit 2, stdout is empty, 1 line(s) on stderr",
+    "`mechcalc beam --support cantilever --load point --length -2 --magnitude 1000 --material steel-a36 rect --b 0.05 --h 0.1`: exit 2, stdout is empty, 1 line(s) on stderr",
+    "`mechcalc beam --support cantilever --load point --length 2 --magnitude 1000 --material unknown-material rect --b 0.05 --h 0.1`: exit 2, stdout is empty, 1 line(s) on stderr",
+    "`python -m mechcalc materials`: exit 0, stdout is readable text, not JSON",
+    "`python -m mechcalc materials --json`: exit 0, stdout is one JSON object"
+  ],
+  "dropped": [],
+  "calls": 1,
+  "prompt_tokens": 5478,
+  "completion_tokens": 1345
+}

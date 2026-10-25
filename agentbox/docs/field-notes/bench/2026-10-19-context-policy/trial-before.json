@@ -1,0 +1,23 @@
+{
+  "label": "before",
+  "image": "agentbox-worker:bench-before",
+  "scenario": "mechcalc-t5",
+  "temperature": 0.0,
+  "worker_exit": 0,
+  "timed_out": false,
+  "wall_minutes": 56.1,
+  "tests_passed": true,
+  "status": "done",
+  "steps": 19,
+  "requests": 19,
+  "compactions": 3,
+  "prompt_tokens_sent": 316685,
+  "prompt_tokens_evaluated": 66939,
+  "prompt_minutes": 33.6,
+  "prompt_tok_per_s": 33.2,
+  "generated_tokens": 7683,
+  "generation_minutes": 21.89,
+  "generation_tok_per_s": 5.85,
+  "max_context_tokens": 23489,
+  "mean_context_tokens": 16668
+}

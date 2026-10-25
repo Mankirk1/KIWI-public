@@ -1,0 +1,12 @@
+{
+  "name": "agentbox",
+  "short_name": "agentbox",
+  "description": "Watch and steer your local coding agent",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f6",
+  "theme_color": "#14532d",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

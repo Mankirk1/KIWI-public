@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="agentbox">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<title>agentbox</title>
+<style nonce="{{NONCE}}">
+:root {
+  --bg: #f4f5f3; --card: #ffffff; --ink: #18201b; --muted: #66706a; --line: #e3e6e2; --soft: #eef1ed;
+  --accent: #15803d; --accent-ink: #ffffff; --accent-soft: #dcfce7;
+  --warn: #b45309; --warn-soft: #fef3c7; --bad: #b91c1c; --bad-soft: #fee2e2; --info: #1d4ed8; --info-soft: #dbeafe;
+  --pause: #475569; --pause-soft: #e2e8f0;
+  --add: #e6f6ea; --add-ink: #14532d; --del: #fdecec; --del-ink: #7f1d1d; --hunk: #eef2ff;
+  --radius: 16px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1210; --card: #171c19; --ink: #e8ece9; --muted: #9aa49e; --line: #29302c; --soft: #1f2622;
+    --accent: #22c55e; --accent-ink: #052e16; --accent-soft: #14321f;
+    --warn: #f59e0b; --warn-soft: #3a2a0c; --bad: #f87171; --bad-soft: #3b1515; --info: #60a5fa; --info-soft: #172a4a;
+    --pause: #94a3b8; --pause-soft: #222b36;
+    --add: #12301c; --add-ink: #bbf7d0; --del: #3a1616; --del-ink: #fecaca; --hunk: #1c2340;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1210; --card: #171c19; --ink: #e8ece9; --muted: #9aa49e; --line: #29302c; --soft: #1f2622;
+  --accent: #22c55e; --accent-ink: #052e16; --accent-soft: #14321f;
+  --warn: #f59e0b; --warn-soft: #3a2a0c; --bad: #f87171; --bad-soft: #3b1515; --info: #60a5fa; --info-soft: #172a4a;
+  --pause: #94a3b8; --pause-soft: #222b36;
+  --add: #12301c; --add-ink: #bbf7d0; --del: #3a1616; --del-ink: #fecaca; --hunk: #1c2340;
+  --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased;
+       padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+button, input, textarea { font: inherit; color: inherit; }
+a { color: var(--info); text-decoration: none; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
+header.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; padding-bottom: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
+.brand img { width: 28px; height: 28px; border-radius: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; font-size: 13px;
+  font-weight: 600; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: inline-block; }
+.chip.run { background: var(--accent-soft); color: var(--accent); }
+.chip.run i { animation: pulse 1.6s ease-in-out infinite; }
+.chip.wait { background: var(--warn-soft); color: var(--warn); }
+.chip.pause { background: var(--pause-soft); color: var(--pause); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+@keyframes pulse { 50% { opacity: .35; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 16px; margin: 12px 0; }
+.label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 22px 4px 6px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.now-title { font-size: 21px; font-weight: 700; letter-spacing: -.015em; margin: 2px 0 4px; overflow-wrap: anywhere; }
+.now-sub { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.bar { height: 8px; background: var(--soft); border-radius: 99px; overflow: hidden; margin: 14px 0 6px; }
+.bar > div { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s ease; width: 0; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1 1 0; }
+.btn { appearance: none; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 12px 14px;
+  font-weight: 600; cursor: pointer; min-height: 48px; transition: transform .05s ease, background .15s ease; }
+.btn:active { transform: scale(.98); }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--bad); }
+.btn.danger.armed { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.ghost { background: transparent; }
+.btn.block { width: 100%; display: block; }
+.banner { border-radius: 12px; padding: 10px 12px; font-size: 14px; margin-top: 12px; display: flex; gap: 10px;
+  align-items: center; justify-content: space-between; }
+.banner.warn { background: var(--warn-soft); color: var(--warn); }
+.banner.bad { background: var(--bad-soft); color: var(--bad); }
+.banner .btn { min-height: 36px; padding: 6px 12px; flex: 0 0 auto; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--soft); border-radius: 12px; padding: 4px; gap: 4px; }
+.seg button { border: 0; background: transparent; border-radius: 9px; padding: 10px; font-weight: 650; cursor: pointer; color: var(--muted); min-height: 44px; }
+.seg button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.mode-help { font-size: 14px; color: var(--muted); margin: 10px 2px 0; }
+.gates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.gate { font-size: 12px; font-weight: 650; padding: 3px 9px; border-radius: 99px; background: var(--soft); color: var(--muted); }
+.gate.on { background: var(--warn-soft); color: var(--warn); }
+.ask { border: 2px solid var(--warn); }
+.ask.flash { animation: flash 1.2s ease 2; }
+@keyframes flash { 50% { box-shadow: 0 0 0 6px var(--warn-soft); } }
+.ask-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.pill { font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; padding: 3px 8px;
+  border-radius: 6px; background: var(--warn-soft); color: var(--warn); }
+.ask h3 { margin: 4px 0 2px; font-size: 18px; letter-spacing: -.01em; overflow-wrap: anywhere; }
+ul.sum { margin: 10px 0 0; padding: 0; list-style: none; }
+ul.sum li { padding: 6px 0 6px 18px; position: relative; font-size: 15px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+ul.sum li::before { content: ""; position: absolute; left: 3px; top: 15px; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+details { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--info); padding: 6px 0; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: " ›"; }
+details[open] summary::after { content: " ⌄"; }
+.dl h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 4px; }
+.dl p, .dl pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.dl pre { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--soft);
+  padding: 10px; border-radius: 10px; max-height: 320px; overflow: auto; }
+.dl ul { margin: 0; padding-left: 18px; font-size: 14px; }
+textarea { width: 100%; min-height: 76px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg);
+  padding: 10px 12px; margin: 12px 0 10px; resize: vertical; }
+textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.choices { display: grid; gap: 8px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: -2px 2px 4px; }
+.err { color: var(--bad); font-size: 14px; margin-top: 8px; min-height: 1em; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--soft); border-radius: 12px; padding: 4px; margin-top: 22px; }
+.tabs button { border: 0; background: transparent; padding: 9px; border-radius: 9px; font-weight: 650; color: var(--muted); cursor: pointer; min-height: 42px; }
+.digest h3 { font-size: 17px; margin: 2px 0 8px; }
+.digest h4 { font-size: 15px; margin: 16px 0 6px; }
+.digest p { margin: 6px 0; font-size: 14px; }
+.digest ul { margin: 4px 0; padding-left: 18px; font-size: 14px; }
+.digest li { margin: 4px 0; }
+.digest table { border-collapse: collapse; font-size: 13px; width: 100%; }
+.digest td { border-bottom: 1px solid var(--soft); padding: 4px 6px 4px 0; }
+.digest code { font-size: 13px; background: var(--soft); border-radius: 4px; padding: 0 4px; }
+.tabs button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--line); align-items: start; }
+.feed li:last-child { border-bottom: 0; }
+.dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 7px; background: var(--muted); }
+.dot.ok { background: var(--accent); } .dot.warn { background: var(--warn); } .dot.ask { background: var(--warn); box-shadow: 0 0 0 3px var(--warn-soft); }
+.dot.info { background: var(--info); }
+.feed .t { font-size: 14.5px; overflow-wrap: anywhere; }
+.feed .when { font-size: 12px; color: var(--muted); white-space: nowrap; margin-top: 2px; }
+.proj h3 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tasks { list-style: none; padding: 0; margin: 12px 0 0; }
+.tasks li { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; align-items: baseline; }
+.tasks .id { font-weight: 700; color: var(--muted); font-size: 13px; }
+.st { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.st.done { background: var(--accent-soft); color: var(--accent); }
+.st.needs_human, .st.blocked { background: var(--bad-soft); color: var(--bad); }
+.st.in_progress { background: var(--info-soft); color: var(--info); }
+pre.log { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere;
+  margin: 0; max-height: 60vh; overflow: auto; }
+.empty { text-align: center; color: var(--muted); padding: 22px 8px; font-size: 14.5px; }
+.sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); display: none; flex-direction: column; }
+.sheet.open { display: flex; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  border-bottom: 1px solid var(--line); background: var(--card); }
+.sheet-head b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet-body { overflow: auto; flex: 1; padding-bottom: env(safe-area-inset-bottom); }
+.diff { font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; padding: 8px 0; }
+.diff div { white-space: pre-wrap; overflow-wrap: anywhere; padding: 0 12px; min-height: 1.55em; }
+.diff .a { background: var(--add); color: var(--add-ink); }
+.diff .d { background: var(--del); color: var(--del-ink); }
+.diff .h { background: var(--hunk); color: var(--info); }
+.diff .f { font-weight: 700; padding-top: 14px; border-top: 1px solid var(--line); background: var(--card); }
+.login { text-align: center; padding-top: 6vh; }
+.login h1 { font-size: 24px; margin: 18px 0 6px; letter-spacing: -.02em; }
+.login p { color: var(--muted); margin: 0 auto 18px; max-width: 340px; }
+.login .btn { min-width: 220px; margin-top: 4px; }
+.code { font: 600 30px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .3em; text-align: center; width: 100%;
+  max-width: 280px; padding: 14px 10px 14px 20px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); }
+code { font: 13px ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 2px 6px; border-radius: 6px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0;
+  transition: all .2s ease; pointer-events: none; z-index: 30; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.foot { text-align: center; margin-top: 26px; font-size: 13px; color: var(--muted); }
+.foot button { border: 0; background: none; color: var(--info); cursor: pointer; font-size: 13px; padding: 8px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><img src="/icon.svg" alt=""> agentbox</div>
+  <span class="chip" id="chip"><i></i><span>Connecting…</span></span>
+</div></header>
+
+<main class="wrap">
+  <section id="login" class="login" hidden>
+    <img src="/icon.svg" alt="" width="72" height="72">
+    <h1>Pair this phone</h1>
+    <p>On the laptop, run <code>agentctl pair</code> and type the 6-digit code here.</p>
+    <input id="code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="000000" aria-label="Pairing code">
+    <div class="err" id="login-err"></div>
+    <button class="btn primary" id="pair-btn">Sign in</button>
+  </section>
+
+  <section id="app" hidden>
+    <div class="card" id="now">
+      <div class="muted small" id="now-kicker">Status</div>
+      <div class="now-title" id="now-title">—</div>
+      <div class="now-sub" id="now-sub"></div>
+      <div class="bar" id="bar-wrap" hidden><div id="bar"></div></div>
+      <div class="muted small" id="bar-text"></div>
+      <div id="banners"></div>
+      <div class="row" id="run-actions" hidden>
+        <button class="btn" id="pause-btn">Pause</button>
+        <button class="btn danger" id="stop-btn">Stop</button>
+      </div>
+    </div>
+
+    <div id="pending-wrap" hidden>
+      <div class="label" id="pending-label">Needs you</div>
+      <div id="pending"></div>
+    </div>
+
+    <div class="label">Control</div>
+    <div class="card">
+      <div class="seg" role="tablist" aria-label="Mode">
+        <button id="mode-auto" data-mode="auto">Auto</button>
+        <button id="mode-manual" data-mode="manual">Manual</button>
+      </div>
+      <p class="mode-help" id="mode-help"></p>
+      <div class="gates" id="gates"></div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button data-tab="activity" class="on">Activity</button>
+      <button data-tab="projects">Projects</button>
+      <button data-tab="log">Live log</button>
+      <button data-tab="digest">Digest</button>
+    </div>
+    <div class="card" id="tab-activity"><ul class="feed" id="feed"></ul></div>
+    <div id="tab-projects" hidden></div>
+    <div class="card digest" id="tab-digest" hidden><div id="digest"></div></div>
+    <div class="card" id="tab-log" hidden>
+      <div class="muted small" id="log-src"></div>
+      <pre class="log" id="log"></pre>
+    </div>
+
+    <div class="foot">
+      <span id="updated"></span> · <button id="logout">Sign out</button>
+    </div>
+  </section>
+</main>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="sheet-head"><b id="sheet-title">Changes</b><button class="btn ghost" id="sheet-close">Close</button></div>
+  <div class="sheet-body"><div class="diff" id="diff"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script nonce="{{NONCE}}">
+"use strict";
+const $ = (id) => document.getElementById(id);
+const GATE = { plan: "Plan", task: "Start task", tests: "Review tests", push: "Push", merge: "Merge" };
+const GATE_HELP = {
+  plan: "before the repo and issues are created",
+  task: "before work on an issue starts",
+  tests: "before the tests written for an issue are locked",
+  push: "before anything is pushed or a PR opened",
+  merge: "before a pull request is merged",
+};
+const PHASE = {
+  starting: "Starting", planning: "Planning the project", running: "Working", coding: "Coding", testing: "Running tests",
+  publishing: "Pushing to GitHub", reviewing: "Reviewing", ci: "Waiting for CI", merging: "Merging",
+  waiting: "Waiting for you", paused: "Paused", idle: "Idle",
+};
+let S = null, tab = "activity", pendingKey = "", drafts = {}, timer = null, logTimer = null, busy = false;
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "text") el.textContent = v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) if (kid !== null && kid !== undefined && kid !== false)
+    el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  return el;
+}
+function ago(iso) {
+  if (!iso) return "";
+  const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+  if (s < 50) return "just now";
+  if (s < 3600) return Math.round(s / 60) + " min ago";
+  if (s < 86400) return Math.round(s / 3600) + " h ago";
+  return new Date(iso).toLocaleDateString();
+}
+function dur(iso) {
+  if (!iso) return "";
+  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+  return m < 1 ? "under a minute" : m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min";
+}
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+async function api(path, body) {
+  const opt = body === undefined ? { credentials: "same-origin" } :
+    { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Agentbox": "1" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  let data = {};
+  try { data = await r.json(); } catch (e) {}
+  if (r.status === 401) { showLogin(); throw new Error("signed out"); }
+  if (!r.ok) throw new Error(data.error || ("HTTP " + r.status));
+  return data;
+}
+function showLogin() {
+  $("app").hidden = true; $("login").hidden = false; setChip("", "Signed out");
+  clearInterval(timer); timer = null; setTimeout(() => $("code").focus(), 50);
+}
+function setChip(cls, text) { const c = $("chip"); c.className = "chip " + cls; c.lastElementChild.textContent = text; }
+
+// ------------------------------------------------------------------ rendering
+function render(s) {
+  S = s;
+  $("login").hidden = true; $("app").hidden = false;
+  const a = s.agent, waiting = s.pending.length > 0;
+  document.title = (waiting ? "(" + s.pending.length + ") " : "") + "agentbox";
+  if (a.lost) setChip("bad", "Stopped unexpectedly");
+  else if (!a.running) setChip("", "Idle");
+  else if (waiting) setChip("wait", "Waiting for you");
+  else if (a.phase === "paused") setChip("pause", "Paused");
+  else setChip("run", "Running");
+
+  // Now card
+  $("now-kicker").textContent = a.running ? (a.project || "agentbox") : "Not running";
+  if (a.running) {
+    const phase = a.phase === "waiting" && !waiting ? "running" : a.phase;  // answered: the agent is moving on
+    $("now-title").textContent = (PHASE[phase] || phase) + (a.task ? " · " + a.task : "");
+    $("now-sub").textContent = [a.detail, a.since ? "for " + dur(a.since) : ""].filter(Boolean).join(" — ");
+  } else {
+    $("now-title").textContent = a.lost ? "The last run ended without saying goodbye" : "Nothing running";
+    $("now-sub").textContent = a.lost ? "Check the live log. The next run will pick up where it stopped."
+      : (a.detail ? "Last run: " + a.detail : "Start a run on the laptop, or wait for tonight's scheduled run.");
+  }
+  const proj = s.projects.find((p) => p.slug === a.project) || (a.running ? null : s.projects[0]);
+  if (proj && proj.total) {
+    const done = (proj.counts.done || 0) + (proj.counts.skipped || 0);
+    $("bar-wrap").hidden = false; $("bar").style.width = Math.round(100 * done / proj.total) + "%";
+    const nh = proj.counts.needs_human || 0;
+    $("bar-text").textContent = done + " of " + proj.total + " tasks merged" + (nh ? " · " + nh + " need you" : "") + (a.running ? "" : " · " + proj.slug);
+  } else { $("bar-wrap").hidden = true; $("bar-text").textContent = ""; }
+
+  const banners = $("banners"); banners.replaceChildren();
+  if (s.stop) banners.append(h("div", { class: "banner bad" },
+    h("span", { text: a.running ? "Stopping at the next checkpoint." : "STOP is set: scheduled runs won't start." }),
+    h("button", { class: "btn", text: "Clear", onclick: () => act("/api/stop", { stop: false }, "Stop cleared") })));
+  if (s.paused) banners.append(h("div", { class: "banner warn" },
+    h("span", { text: a.phase === "paused" ? "Paused. Nothing new starts until you resume." : "Pause requested: holds at the next checkpoint." }),
+    h("button", { class: "btn", text: "Resume", onclick: () => act("/api/pause", { paused: false }, "Resumed") })));
+  $("run-actions").hidden = !a.running;
+  $("pause-btn").textContent = s.paused ? "Resume" : "Pause";
+  $("stop-btn").disabled = s.stop;
+
+  // Mode
+  $("mode-auto").classList.toggle("on", s.mode === "auto");
+  $("mode-manual").classList.toggle("on", s.mode === "manual");
+  const asking = s.mode === "manual" ? s.gates.manual : s.gates.always;
+  $("mode-help").textContent = s.mode === "manual"
+    ? "Manual: the agent waits for your OK at each step below. Questions show up here" + (s.notify ? " and as a notification." : ".")
+    : (asking.length ? "Auto: runs on its own, but still asks before: " + asking.map((g) => GATE[g]).join(", ") + "."
+                     : "Auto: runs on its own and reports when the run ends. Switch to Manual any time.")
+    + (s.night && s.night.hours ? " Night " + s.night.hours + (s.night.active ? " (now)" : "") + ":"
+       + (s.night.timeout_min > 0 ? " unanswered questions are left for you after " + s.night.timeout_min + " min;" : "")
+       + (s.night.quiet ? " notifications are silent." : "") : "");
+  $("gates").replaceChildren(...["plan", "task", "tests", "push", "merge"].map((g) =>
+    h("span", { class: "gate" + (asking.includes(g) ? " on" : ""), title: GATE_HELP[g], text: GATE[g] + (asking.includes(g) ? " ✓" : "") })));
+
+  renderPending(s.pending);
+  renderFeed(s.events);
+  if (tab === "projects") renderProjects(s.projects);
+  $("updated").textContent = "Updated " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function renderPending(list) {
+  $("pending-wrap").hidden = list.length === 0;
+  $("pending-label").textContent = list.length > 1 ? "Needs you (" + list.length + ")" : "Needs you";
+  const key = list.map((p) => p.id).join(",");
+  if (key === pendingKey) {
+    for (const p of list) { const el = document.querySelector('[data-ago="' + p.id + '"]'); if (el) el.textContent = ago(p.created); }
+    return;
+  }
+  pendingKey = key;
+  $("pending").replaceChildren(...list.map(askCard));
+  focusDeepLink();
+}
+
+function askCard(p) {
+  const note = h("textarea", { placeholder: "Note for the agent (optional)", "aria-label": "Note" });
+  note.value = drafts[p.id] || "";
+  note.addEventListener("input", () => { drafts[p.id] = note.value; });
+  const err = h("div", { class: "err" });
+  const details = Object.entries(p.details || {}).filter(([, v]) => v && (!Array.isArray(v) || v.length));
+  const dl = details.length ? h("details", {}, h("summary", { text: "Details" }),
+    h("div", { class: "dl" }, ...details.map(([k, v]) => [h("h4", { text: k }),
+      Array.isArray(v) ? h("ul", {}, ...v.map((x) => h("li", { text: x })))
+        : (String(v).length > 400 || String(v).includes("\n") ? h("pre", { text: v }) : h("p", { text: v }))]))) : null;
+  const links = (p.links || []).map((l) => h("a", { href: l.url, target: "_blank", rel: "noopener", text: l.label + " ↗" }));
+  const buttons = p.choices.map((c) => {
+    const b = h("button", { class: "btn block " + (c.style || ""), text: c.label });
+    b.addEventListener("click", () => choose(p, c, note, err, b));
+    return [b, c.hint ? h("div", { class: "hint", text: c.hint }) : null];
+  });
+  return h("div", { class: "card ask", id: "a-" + p.id },
+    h("div", { class: "ask-head" }, h("span", { class: "pill", text: GATE[p.gate] || p.gate }),
+      h("span", { class: "muted small", "data-ago": p.id, text: ago(p.created) })),
+    h("h3", { text: p.title }),
+    h("div", { class: "muted small", text: [p.project, p.task].filter(Boolean).join(" · ") }),
+    p.summary.length ? h("ul", { class: "sum" }, ...p.summary.map((x) => h("li", { text: x }))) : null,
+    links.length ? h("div", { class: "row small" }, ...links) : null,
+    dl,
+    p.diff_lines ? h("button", { class: "btn block ghost", text: "View changes (" + p.diff_lines + " lines)", onclick: () => openDiff(p) }) : null,
+    note, h("div", { class: "choices" }, ...buttons), err);
+}
+
+async function choose(p, c, note, err, btn) {
+  err.textContent = "";
+  if (c.needs_note && !note.value.trim()) { err.textContent = "Write a note first: the agent needs to know what to change."; note.focus(); return; }
+  if (c.style === "danger" && !btn.classList.contains("armed")) {
+    btn.classList.add("armed"); const label = btn.textContent; btn.textContent = "Tap again to confirm";
+    setTimeout(() => { btn.classList.remove("armed"); btn.textContent = label; }, 3500); return;
+  }
+  btn.disabled = true;
+  try {
+    const s = await api("/api/approvals/" + encodeURIComponent(p.id), { choice: c.id, note: note.value });
+    delete drafts[p.id]; toast("Sent: " + c.label); render(s);
+  } catch (e) { err.textContent = e.message; btn.disabled = false; }
+}
+
+function renderFeed(events) {
+  const feed = $("feed");
+  if (!events.length) { feed.replaceChildren(h("li", { class: "empty", text: "No activity yet." })); return; }
+  const cls = (e) => e.level === "ask" ? "ask" : e.level === "warn" ? "warn" : ["merge", "answer"].includes(e.kind) ? "ok" : e.kind === "run" ? "info" : "";
+  feed.replaceChildren(...events.slice(0, 40).map((e) => h("li", {},
+    h("span", { class: "dot " + cls(e) }),
+    h("div", {}, h("div", { class: "t" }, e.text, e.link ? [" ", h("a", { href: e.link, target: "_blank", rel: "noopener", text: "↗" })] : null),
+      e.project ? h("div", { class: "muted small", text: e.project + (e.task ? " · " + e.task : "") }) : null),
+    h("span", { class: "when", text: ago(e.ts) }))));
+}
+
+function renderProjects(projects) {
+  const box = $("tab-projects");
+  if (!projects.length) { box.replaceChildren(h("div", { class: "card empty", text: "No projects yet. Start one with agentctl new outlines/<name>.md" })); return; }
+  const LBL = { done: "done", todo: "to do", in_progress: "working", needs_human: "needs you", blocked: "blocked", skipped: "skipped" };
+  box.replaceChildren(...projects.map((p) => h("div", { class: "card proj" },
+    h("h3", {}, h("a", { href: p.url, target: "_blank", rel: "noopener", text: p.slug + " ↗" })),
+    p.last_run ? h("div", { class: "muted small", text: p.last_run.finished
+      ? "Last run " + ago(p.last_run.finished) + ": " + (p.last_run.stop || "finished") + " · " + p.last_run.done + " merged"
+      : "Run in progress (" + p.last_run.id + ")" }) : null,
+    h("div", { class: "counts" }, ...Object.entries(p.counts).map(([k, v]) => h("span", { class: "st " + k, text: v + " " + (LBL[k] || k) }))),
+    h("ul", { class: "tasks" }, ...p.tasks.map((t) => h("li", {},
+      h("span", { class: "id", text: t.id }),
+      h("span", {}, t.title, " ", t.pr ? h("a", { href: p.url + "/pull/" + t.pr, target: "_blank", rel: "noopener", text: "#" + t.pr })
+        : t.issue ? h("a", { href: p.url + "/issues/" + t.issue, target: "_blank", rel: "noopener", text: "#" + t.issue }) : null),
+      h("span", { class: "st " + t.status, text: LBL[t.status] || t.status })))))));
+}
+
+async function openDiff(p) {
+  $("sheet-title").textContent = p.title; $("diff").replaceChildren(h("div", { class: "empty", text: "Loading…" }));
+  $("sheet").classList.add("open"); document.body.style.overflow = "hidden";
+  try {
+    const full = await api("/api/approvals/" + encodeURIComponent(p.id));
+    const lines = (full.diff || "").split("\n");
+    $("diff").replaceChildren(...lines.map((l) => h("div", {
+      class: l.startsWith("diff --git") ? "f" : l.startsWith("@@") ? "h" : (l.startsWith("+") && !l.startsWith("+++")) ? "a"
+        : (l.startsWith("-") && !l.startsWith("---")) ? "d" : "", text: l.startsWith("diff --git") ? l.replace(/^diff --git a\/(\S+) b\/.*/, "$1") : l })));
+  } catch (e) { $("diff").replaceChildren(h("div", { class: "empty", text: e.message })); }
+}
+function closeSheet() { $("sheet").classList.remove("open"); document.body.style.overflow = ""; }
+
+async function loadLog() {
+  try { const r = await api("/api/log"); $("log-src").textContent = r.source ? "Last lines of the " + r.source + " log" : "";
+        const pre = $("log"); const atEnd = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 30;
+        pre.textContent = r.text; if (atEnd) pre.scrollTop = pre.scrollHeight; } catch (e) {}
+}
+
+// The digest is Markdown written by agentbox (digest.py): headings, bullets, tables, **bold**, `code`, links.
+function inline(text) {
+  const out = [], re = /\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    out.push(m[1] ? h("b", { text: m[1] }) : m[2] ? h("code", { text: m[2] }) : h("a", { href: m[4], target: "_blank", rel: "noopener", text: m[3] }));
+    last = re.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+function renderDigest(md) {
+  const nodes = []; let list = null, table = null;
+  for (const line of md.split("\n")) {
+    if (!line.startsWith("- ")) list = null;
+    if (!line.startsWith("|")) table = null;
+    if (line.startsWith("# ")) nodes.push(h("h3", {}, ...inline(line.slice(2))));
+    else if (line.startsWith("## ")) nodes.push(h("h4", {}, ...inline(line.slice(3))));
+    else if (line.startsWith("- ")) { if (!list) nodes.push(list = h("ul", {})); list.append(h("li", {}, ...inline(line.slice(2)))); }
+    else if (line.startsWith("|")) {
+      if (/^\|[-| ]+\|$/.test(line)) continue;
+      if (!table) nodes.push(table = h("table", {}));
+      table.append(h("tr", {}, ...line.slice(1, -1).split("|").map((c) => h("td", {}, ...inline(c.trim())))));
+    } else if (line.trim()) nodes.push(h("p", {}, ...inline(line)));
+  }
+  return nodes;
+}
+async function loadDigest() {
+  try { const r = await api("/api/digest");
+        $("digest").replaceChildren(...(r.text ? renderDigest(r.text) : [h("div", { class: "empty", text: "No digest yet: one is written when a run ends." })])); }
+  catch (e) { $("digest").replaceChildren(h("div", { class: "empty", text: e.message })); }
+}
+
+function focusDeepLink() {
+  if (location.hash === "#digest") { document.querySelector('.tabs button[data-tab="digest"]').click(); history.replaceState(null, "", location.pathname); return; }
+  const m = location.hash.match(/a=([\w-]+)/); if (!m) return;
+  const el = $("a-" + m[1]); if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("flash");
+  history.replaceState(null, "", location.pathname);
+}
+
+// ------------------------------------------------------------------ actions
+async function act(path, body, msg) {
+  if (busy) return; busy = true;
+  try { render(await api(path, body)); if (msg) toast(msg); } catch (e) { toast(e.message); } finally { busy = false; }
+}
+async function refresh() {
+  try { render(await api("/api/state")); }
+  catch (e) { if (e.message !== "signed out") setChip("bad", "Can't reach the laptop"); }
+}
+function startPolling() { clearInterval(timer); timer = setInterval(() => { if (!document.hidden) refresh(); }, 3000); }
+
+$("pair-btn").addEventListener("click", async () => {
+  $("login-err").textContent = "";
+  try { await api("/api/pair", { code: $("code").value }); $("code").value = ""; await refresh(); startPolling(); toast("This phone is paired"); }
+  catch (e) { $("login-err").textContent = e.message; }
+});
+$("code").addEventListener("keydown", (e) => { if (e.key === "Enter") $("pair-btn").click(); });
+for (const b of document.querySelectorAll(".seg button")) b.addEventListener("click", () => {
+  if (S && S.mode === b.dataset.mode) return;
+  const pending = S ? S.pending.length : 0;
+  act("/api/mode", { mode: b.dataset.mode }, b.dataset.mode === "auto"
+    ? (pending ? "Auto: waiting questions are approved" : "Auto mode") : "Manual mode: the agent will ask you");
+});
+$("pause-btn").addEventListener("click", () => act("/api/pause", { paused: !(S && S.paused) }, S && S.paused ? "Resumed" : "Pause requested"));
+$("stop-btn").addEventListener("click", () => {
+  const b = $("stop-btn");
+  if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Tap again to stop";
+    setTimeout(() => { b.classList.remove("armed"); b.textContent = "Stop"; }, 3500); return; }
+  b.classList.remove("armed"); b.textContent = "Stop"; act("/api/stop", { stop: true }, "Stopping at the next checkpoint");
+});
+for (const b of document.querySelectorAll(".tabs button")) b.addEventListener("click", () => {
+  tab = b.dataset.tab;
+  for (const x of document.querySelectorAll(".tabs button")) x.classList.toggle("on", x === b);
+  for (const t of ["activity", "projects", "log", "digest"]) $("tab-" + t).hidden = t !== tab;
+  clearInterval(logTimer);
+  if (tab === "projects" && S) renderProjects(S.projects);
+  if (tab === "digest") loadDigest();
+  if (tab === "log") { loadLog(); logTimer = setInterval(() => { if (!document.hidden) loadLog(); }, 4000); }
+});
+$("sheet-close").addEventListener("click", closeSheet);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
+$("logout").addEventListener("click", async () => { try { await api("/api/logout", {}); } catch (e) {} showLogin(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden && timer) refresh(); });
+window.addEventListener("hashchange", focusDeepLink);
+
+refresh().finally(() => { if ($("login").hidden) startPolling(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Copy to  C:\Users\<you>\.wslconfig   then run  wsl --shutdown  in PowerShell.
+# WSL2 (and Docker Desktop, which runs inside it) can only use the memory you give it here.
+# By default WSL takes half of your RAM - too little for a 17-22 GB model plus sandboxes.
+
+[wsl2]
+# Dell XPS 15 9530, 32 GB: the 17.7 GB model + Docker + sandboxes need ~24 GB; leave ~6 GB for Windows.
+memory=26GB
+# i7-13620H has 16 threads (6 P-cores + 4 E-cores). Leave two for Windows.
+processors=14
+# Extra headroom when a model swaps while a test suite is running.
+swap=16GB
+# Only if `agentctl doctor` cannot reach llama-swap on localhost from WSL (see the setup guide):
+# networkingMode=mirrored

@@ -1,0 +1,146 @@
+{
+  "label": "planted",
+  "planted": [
+    "run 2: stainless E 200 GPa instead of 193",
+    "run 2: titanium E 114 GPa instead of 113.8",
+    "run 2: titanium yield 828 MPa instead of 880",
+    "run 3: materials --json as an array, not one object",
+    "run 4 attempt 1: invalid geometry gives a traceback and exit 1",
+    "run 4 attempt 1: section prints JSON instead of readable text",
+    "run 3 supervisor plant: cantilever point deflection /48"
+  ],
+  "tests_passed": false,
+  "seconds": 14,
+  "line": "Outline checks: 38 pass, 10 fail \u00b7 1 import(s) of names that don't exist",
+  "passed": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "C9",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "C18",
+    "C19",
+    "C20",
+    "C23",
+    "C24",
+    "C25",
+    "C26",
+    "C27",
+    "C28",
+    "C29",
+    "C31",
+    "C32",
+    "C33",
+    "C34",
+    "C35",
+    "C36",
+    "C39",
+    "C42",
+    "C43",
+    "C44",
+    "C45",
+    "C48"
+  ],
+  "failed": [
+    {
+      "id": "C17",
+      "status": "fail",
+      "actual": "200000000000.0",
+      "detail": "got 200000000000.0, the outline gives 193e9 = 193000000000.0",
+      "brief": "mechcalc.materials.get_material('stainless-304').E == 193e9 (rel 0.001)",
+      "task": "T3"
+    },
+    {
+      "id": "C21",
+      "status": "fail",
+      "actual": "114000000000.0",
+      "detail": "got 114000000000.0, the outline gives 113.8e9 = 113800000000.0",
+      "brief": "mechcalc.materials.get_material('titanium-ti6al4v').E == 113.8e9 (rel 0.001)",
+      "task": "T3"
+    },
+    {
+      "id": "C22",
+      "status": "fail",
+      "actual": "828000000.0",
+      "detail": "got 828000000.0, the outline gives 880e6 = 880000000.0",
+      "brief": "mechcalc.materials.get_material('titanium-ti6al4v').yield_strength == 880e6 (rel 0.001)",
+      "task": "T3"
+    },
+    {
+      "id": "C30",
+      "status": "fail",
+      "actual": "0.00019999999999999996",
+      "detail": "got 0.00019999999999999996, the outline gives 1000*2**3 / (3*200e9*0.05*0.1**3/12) = 0.0031999999999999993",
+      "brief": "mechcalc.beams.analyse_beam('cantilever', 'point', 2, 1000, mechcalc.sections.Rectangle(b=0.05, h=0.1), mechcalc.materials.get_material('steel-a36')).max_deflection == 1000*2**3 / (3*200e9*0.05*0.1**3/12) (rel 0.001)",
+      "task": "T4"
+    },
+    {
+      "id": "C37",
+      "status": "fail",
+      "actual": "exit 1; stdout '.............F..................FFFF.........F.......................... [ 54%]\\n....F.........FF.....................\u2026; stderr ''",
+      "detail": "exit status 1, expected 0",
+      "brief": "`python -m pytest -q`: exit 0, stdout is readable text, not JSON",
+      "task": "T6"
+    },
+    {
+      "id": "C38",
+      "status": "fail",
+      "actual": "exit 0; stdout '[\\n  {\\n    \"key\": \"steel-a36\",\\n    \"name\": \"Structural steel ASTM A36\",\\n    \"E\": 200000000000.0,\\n    \"yield_streng\u2026; stderr ''",
+      "detail": "stdout is not one JSON object (it is a JSON list)",
+      "brief": "`mechcalc materials --json`: exit 0, stdout is one JSON object",
+      "task": "T6"
+    },
+    {
+      "id": "C40",
+      "status": "fail",
+      "actual": "exit 0; stdout '[\\n  {\\n    \"key\": \"steel-a36\",\\n    \"name\": \"Structural steel ASTM A36\",\\n    \"E\": 200000000000.0,\\n    \"yield_streng\u2026; stderr ''",
+      "detail": "stdout is not one JSON object (it is a JSON list)",
+      "brief": "`mechcalc materials --json`: exit 0, stdout is one JSON object",
+      "task": "T5"
+    },
+    {
+      "id": "C41",
+      "status": "fail",
+      "actual": "exit 0; stdout '{\"area\": 0.005000000000000001}'; stderr ''",
+      "detail": "stdout is JSON, expected readable text",
+      "brief": "`mechcalc section rect --b 0.05 --h 0.1`: exit 0, stdout is readable text, not JSON",
+      "task": "T5"
+    },
+    {
+      "id": "C46",
+      "status": "fail",
+      "actual": "exit 1; stdout ''; stderr 'Traceback (most recent call last):\\n  File \"/home/agent/.local/bin/mechcalc\", line 8, in <module>\\n    sys.exit(main()\u2026",
+      "detail": "exit status 1, expected 2; 17 line(s) on stderr, expected 1 (first: 'Traceback (most recent call last):', last: 'ValueError: b must be positive, got -0.05')",
+      "brief": "`mechcalc section rect --b -0.05 --h 0.1`: exit 2, stdout is empty, 1 line(s) on stderr",
+      "task": "T5"
+    },
+    {
+      "id": "C47",
+      "status": "fail",
+      "actual": "exit 1; stdout ''; stderr 'Traceback (most recent call last):\\n  File \"/home/agent/.local/bin/mechcalc\", line 8, in <module>\\n    sys.exit(main()\u2026",
+      "detail": "exit status 1, expected 2; 13 line(s) on stderr, expected 1 (first: 'Traceback (most recent call last):', last: 'ValueError: length must be positive, got -2.0')",
+      "brief": "`mechcalc beam --support cantilever --load point --length -2 --magnitude 1000 --material steel-a36 rect --b 0.05 --h 0.1`: exit 2, stdout is empty, 1 line(s) on stderr",
+      "task": "T5"
+    }
+  ],
+  "dangling": [
+    "src/mechcalc/beams.py:24 imports Section from mechcalc.sections, which does not define it"
+  ],
+  "mutation": null,
+  "test_tail": [
+    "  Obtained: 828000000.0",
+    "  Expected: 880000000.0 \u00b1 880",
+    "9 failed, 123 passed in 0.78s"
+  ]
+}

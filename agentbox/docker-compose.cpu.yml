@@ -1,0 +1,18 @@
+# Override for machines WITHOUT an NVIDIA GPU - including this Dell XPS 15 9530 (Intel Arc A370M).
+# select-profile.sh ... cpu  sets COMPOSE_FILE in .env so plain `docker compose` uses it.
+#
+# The CPU image is llama.cpp's own server image with llama-swap added. It reads its config
+# from /app/config.yaml (not /etc/llama-swap/...), runs as uid 10001, listens on :8080 and
+# has llama-server on PATH.
+services:
+  llama-swap:
+    image: ${LLAMA_SWAP_IMAGE_CPU:-ghcr.io/mostlygeek/llama-swap:cpu}
+    # The llama-swap/ folder is mounted, not the single config.yaml: Docker Desktop loses
+    # single-file bind mounts when it restarts (the container then fails with "error mounting
+    # ... config.yaml: no such file or directory"), and editors that replace the file on save
+    # leave a file mount showing the old version, so hot reload never sees the change.
+    volumes: !override
+      - ${MODELS_DIR:-./models}:/models:ro
+      - ./llama-swap:/app/agentbox:ro
+    entrypoint: ["/app/llama-swap", "-config", "/app/agentbox/config.yaml", "-watch-config"]
+    deploy: !reset {}

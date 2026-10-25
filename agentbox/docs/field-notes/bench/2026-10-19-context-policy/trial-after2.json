@@ -1,0 +1,23 @@
+{
+  "label": "after2",
+  "image": "agentbox-worker:bench-after2",
+  "scenario": "mechcalc-t5",
+  "temperature": 0.0,
+  "worker_exit": 0,
+  "timed_out": false,
+  "wall_minutes": 42.8,
+  "tests_passed": true,
+  "status": "done",
+  "steps": 22,
+  "requests": 22,
+  "compactions": 3,
+  "prompt_tokens_sent": 331564,
+  "prompt_tokens_evaluated": 57917,
+  "prompt_minutes": 27.76,
+  "prompt_tok_per_s": 34.8,
+  "generated_tokens": 5923,
+  "generation_minutes": 14.37,
+  "generation_tok_per_s": 6.87,
+  "max_context_tokens": 22664,
+  "mean_context_tokens": 15071
+}

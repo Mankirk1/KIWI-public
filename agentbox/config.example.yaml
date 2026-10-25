@@ -1,0 +1,111 @@
+# agentbox configuration - tuned for the Dell XPS 15 9530 (i7-13620H, 32 GB, CPU-only models).
+# setup-wsl.sh copies this to config.yaml (git-ignored). Secrets go in .env, never here.
+
+github:
+  owner: CHANGE-ME-agents        # the GitHub organization for agent-built repos, e.g. mankirk1-agents
+  owner_type: org                # org | user
+  private: true                  # new repositories are private
+  admin_token_env: GH_ADMIN_TOKEN   # orchestrator token: creates repos, pushes, merges
+  agent_token_env: GH_AGENT_TOKEN   # read-only token given to the models via the GitHub MCP server
+  git_author_name: agentbox-bot
+  git_author_email: agentbox-bot@users.noreply.github.com
+
+llm:
+  base_url: http://localhost:8080/v1   # llama-swap, as seen from WSL
+  request_timeout_s: 1800              # a long planning answer on a laptop can take many minutes
+  roles:
+    planner:                           # writes the spec and the task plan
+      model: qwen-coder
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 16384
+      thinking: true                   # reasoning on: better plans, slower (plans are made once)
+      context_tokens: 32768            # = --ctx-size of qwen-coder in llama-swap/config.yaml
+    coder:                             # the agent that edits code in the sandbox
+      model: qwen-coder
+      temperature: 0.6
+      top_p: 0.95
+      top_k: 20
+      max_tokens: 8192
+      thinking: false                  # CPU: reasoning tokens are slow; turn on if quality disappoints
+      context_tokens: 32768            # keep equal to --ctx-size in llama-swap/config.yaml
+    reviewer:                          # different model family: critiques plans, reviews PRs
+      model: gemma-reviewer
+      temperature: 0.2
+      top_p: 0.95
+      top_k: 64
+      max_tokens: 4096
+      thinking: false
+      context_tokens: 24576            # = --ctx-size of gemma-reviewer
+
+sandbox:
+  worker_image: agentbox-worker:latest
+  network: agentbox-internal
+  llm_url_in_sandbox: http://llama-swap:8080/v1
+  proxy_url: http://egress-proxy:3128
+  cpus: 4                    # per container
+  memory: 4g                 # per container; 6g is fine on a 64 GB machine
+  pids_limit: 1024
+  worker_timeout_min: 90     # hard limit for one coding attempt (CPU inference is slow)
+  test_timeout_min: 20       # hard limit for one test run (includes dependency install)
+  max_agent_steps: 60        # tool calls per attempt
+  mcp_toolsets: repos,issues,pull_requests
+  mcp: auto                  # GitHub tools for the coder: auto (only when the task mentions #12) | always | off
+
+workflow:
+  tdd: true                  # write + lock tests from the acceptance criteria before implementing
+  max_attempts_per_task: 3   # implementation attempts before handing the issue to you
+  max_tasks_per_project: 25
+  max_diff_lines: 1500       # larger changes are rejected and retried smaller
+  plan_review: true          # reviewer critiques the plan before issues are created
+  protected_paths: [".github/**", "AGENTS.md", "SPEC.md", "OUTLINE.md"]
+  ci:
+    mode: advisory           # require | advisory | off  (advisory: a CI failure blocks, missing CI does not)
+    wait_timeout_min: 20
+    require_for_auto_merge: true   # a merge without you needs CI to pass (not just "no failure")
+  checks:                    # outline checks (agentbox/oracle.py; `agentctl checks REPO` lists them)
+    enabled: true            # written from the outline at planning; after the tests pass, the code must pass them
+    mutation: true           # plant small errors in the task's Python code: which ones do the tests miss? (report only)
+    mutation_max: 20
+    mutation_budget_s: 180
+  merge_method: squash
+  allowed_stacks: [python, node]
+
+budget:
+  max_hours: 8               # stop starting new work after this long
+  max_consecutive_failures: 4
+  max_wall_hours: 0          # hard wall-clock limit, waits included (0 = none); for nights set it below the
+                             # nightly task's 9 h, e.g. 8.75: no attempt starts unless it can finish before it
+  stop_file: ~/agentbox-runtime/STOP   # `agentctl stop` creates it
+
+notify:
+  ntfy_url: ""               # e.g. https://ntfy.sh/agentbox-<long-random-string> for phone notifications
+
+sentinel:                    # rule-based watchdog during runs (no model; changes nothing)
+  enabled: true
+  interval_s: 30
+  notify: high               # high | medium | off - which findings also go to the phone (ntfy)
+
+guards:
+  ollama: stop               # stop | abort | warn | off - Ollama must not compete for RAM/CPU
+  restore_ollama: true       # restart the Ollama app/containers that were stopped, when the run ends
+
+control:                     # remote control from your phone (README: "Control from your phone")
+  mode: auto                 # auto | manual - starting mode; switch any time from the phone panel or `agentctl mode`
+  manual_gates: [plan, task, tests, push, merge]   # where manual mode waits for your OK
+  always_ask: []             # gates that wait even in auto mode, e.g. [merge]
+  approval_timeout_min: 0    # 0 = wait for your answer as long as it takes (Stop still works)
+  on_timeout: stop           # stop | approve | skip - what to do when a question times out
+  night:                     # unattended hours (local time); empty hours = no night rules
+    hours: ""                # e.g. "23:00-07:30"
+    question_timeout_min: 30 # at night, a question nobody answers in time is left for you (PR stays open,
+                             # task skipped) and the run moves on to work that doesn't depend on it
+    quiet: true              # at night, notifications arrive silently (low priority)...
+    wake_for_sentinel_high: true   # ...except Sentinel's high-severity alerts
+  panel_host: 127.0.0.1      # keep it local; reach it from the phone through Tailscale
+  panel_port: 8765
+  public_url: ""             # e.g. https://my-laptop.tail1234.ts.net - used for links in notifications
+
+paths:
+  data_dir: ~/agentbox-runtime   # outside the git checkout; models live in <data_dir>/models

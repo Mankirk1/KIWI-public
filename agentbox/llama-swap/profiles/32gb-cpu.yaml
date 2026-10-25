@@ -1,0 +1,55 @@
+# llama-swap profile "32gb-cpu" - Dell XPS 15 9530, i7-13620H (6 P-cores + 4 E-cores,
+# 16 threads), 32 GB DDR5-4800, Intel Arc A370M (not used: no CUDA, and Vulkan through
+# WSL2/Docker is not reliable). Everything runs on the CPU.
+#
+#   qwen-coder      Qwen3.6-35B-A3B  UD-IQ4_XS  (17.7 GB)  planner + coder
+#   gemma-reviewer  Gemma 4 26B-A4B  UD-IQ4_XS  (13.6 GB)  plan critic + code reviewer
+#
+# Both are mixture-of-experts models (~3-4B parameters active per token), which is what
+# makes a 35B-class model usable on a laptop CPU. Only one is loaded at a time; llama-swap
+# swaps on demand (expect 10-60 s per swap while the file is read from disk).
+#
+# Runs in the CPU image (ghcr.io/mostlygeek/llama-swap:cpu), where llama-server is on PATH.
+# Edit and save: llama-swap reloads this file automatically.
+
+healthCheckTimeout: 900        # a cold load of 17.7 GB can take a few minutes
+logLevel: info
+logToStdout: both
+startPort: 10001
+globalTTL: 0
+
+macros:
+  llama_bin: "llama-server"
+  # Measured on this XPS 15 with `llama bench` (qwen-coder, 2026-10-16, Windows power mode
+  # "Best performance"; see docs/field-notes/2026-10-phase-c.md):
+  #   with an empty context, 6-14 threads all give ~50 tok/s prompt and ~12.5 tok/s generation;
+  #   at a realistic 4,096-token context:   prompt   generation
+  #     6 threads, q8_0 KV cache            31.7      10.6       (the old setting)
+  #    12 threads, q8_0 KV cache            35.7      11.5
+  #    12 threads, f16  KV cache            44.2      11.4       <- this setting
+  # Prompt reading was 60% of all model time in a real run, so the f16 cache (+40%) matters most.
+  common: >-
+    ${llama_bin} --host 127.0.0.1 --port ${PORT}
+    --jinja --flash-attn on
+    --cache-type-k f16 --cache-type-v f16
+    --parallel 1 --threads 12 --threads-batch 12
+    --metrics
+
+models:
+  qwen-coder:
+    name: "Qwen3.6-35B-A3B (UD-IQ4_XS, CPU) - planner/coder"
+    cmd: |
+      ${common}
+      --model /models/Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
+      --alias qwen-coder
+      --ctx-size 32768
+      --temp 0.6 --top-p 0.95 --top-k 20 --min-p 0.0
+
+  gemma-reviewer:
+    name: "Gemma 4 26B-A4B (UD-IQ4_XS, CPU) - reviewer"
+    cmd: |
+      ${common}
+      --model /models/gemma-4-26B-A4B-it-UD-IQ4_XS.gguf
+      --alias gemma-reviewer
+      --ctx-size 24576
+      --temp 1.0 --top-p 0.95 --top-k 64

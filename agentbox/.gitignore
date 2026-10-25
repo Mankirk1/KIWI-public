@@ -1,0 +1,10 @@
+.env
+config.yaml
+.venv/
+models/
+data/
+STOP
+llama-swap/config.yaml
+__pycache__/
+*.pyc
+*.egg-info/

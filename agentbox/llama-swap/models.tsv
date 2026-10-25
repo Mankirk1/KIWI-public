@@ -1,0 +1,9 @@
+# profile	hugging-face-repo	file	approx-GB
+16gb	unsloth/Qwen3.5-9B-GGUF	Qwen3.5-9B-Q4_K_M.gguf	5.7
+16gb	unsloth/gemma-4-E4B-it-GGUF	gemma-4-E4B-it-Q4_K_M.gguf	5.0
+32gb	unsloth/Qwen3.6-35B-A3B-GGUF	Qwen3.6-35B-A3B-UD-IQ4_XS.gguf	17.7
+32gb	unsloth/gemma-4-26B-A4B-it-GGUF	gemma-4-26B-A4B-it-UD-IQ4_XS.gguf	13.6
+64gb	unsloth/Qwen3.6-35B-A3B-GGUF	Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf	22.4
+64gb	unsloth/gemma-4-26B-A4B-it-GGUF	gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf	17.0
+32gb-cpu	unsloth/Qwen3.6-35B-A3B-GGUF	Qwen3.6-35B-A3B-UD-IQ4_XS.gguf	17.7
+32gb-cpu	unsloth/gemma-4-26B-A4B-it-GGUF	gemma-4-26B-A4B-it-UD-IQ4_XS.gguf	13.6

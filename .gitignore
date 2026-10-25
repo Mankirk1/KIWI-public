@@ -1,0 +1,51 @@
+# Python virtual environments
+venv/
+.venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+# Executable files
+*.exe
+*.dll
+*.so
+*.dylib
+.vs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# agentbox local state (also covered by agentbox/.gitignore)
+agentbox/.env
+agentbox/config.yaml
+agentbox/llama-swap/config.yaml
+
+# Never commit keys or local service state
+*.pem
+id_rsa*
+id_ed25519*
+*.sqlite
+n8n/
+ollama_data/
+
+# Personal Claude Code settings (the shared ones are .claude/settings.json)
+.claude/settings.local.json

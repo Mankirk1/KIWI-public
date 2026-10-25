@@ -1,0 +1,24 @@
+{
+  "seconds": 5004,
+  "checks": 45,
+  "dropped": [
+    "T5: check C6: expr is not a Python expression: \"import json, sys; from io import StringIO; old_stdout = sys.stdout; sys.stdout = StringIO(); mechcalc.cli.main(['section', 'rect', '--b', '0.05', '--h', '0.1', '--json']); out = sys.stdout.getvalue(); sys.stdout = old_stdout; data = json.loads(out); set(data.keys())\"",
+    "T5: check C7: expr is not a Python expression: \"import json, sys; from io import StringIO; old_stdout = sys.stdout; sys.stdout = StringIO(); mechcalc.cli.main(['beam', '--support', 'cantilever', '--load', 'point', '--length', '2', '--magnitude', '1000', '--material', 'steel-a36', 'rect', '--b', '0.05', '--h', '0.1', '--json']); out = sys.stdout.getvalue(); sys.stdout = old_stdout; data = json.loads(out); set(data.keys())\"",
+    "T5: check C8: expr is not a Python expression: \"import json, sys; from io import StringIO; old_stdout = sys.stdout; sys.stdout = StringIO(); mechcalc.cli.main(['section', 'rect', '--b', '0.05', '--h', '0.1', '--json']); out = sys.stdout.getvalue(); sys.stdout = old_stdout; data = json.loads(out); (data['area'], data['second_moment'], data['extreme_fibre'])\"",
+    "T5: check C9: expr is not a Python expression: \"import json, sys; from io import StringIO; old_stdout = sys.stdout; sys.stdout = StringIO(); mechcalc.cli.main(['beam', '--support', 'cantilever', '--load', 'point', '--length', '2', '--magnitude', '1000', '--material', 'steel-a36', 'rect', '--b', '0.05', '--h', '0.1', '--json']); out = sys.stdout.getvalue(); sys.stdout = old_stdout; data = json.loads(out); (data['max_moment'], data['max_stress'], data['max_deflection'], data['safety_factor'], data['self_weight_note'])\"",
+    "T5: check C10: expr is not a Python expression: \"import json, sys; from io import StringIO; old_stdout = sys.stdout; sys.stdout = StringIO(); mechcalc.cli.main(['materials', '--json']); out = sys.stdout.getvalue(); sys.stdout = old_stdout; data = json.loads(out); len(data)\"",
+    "T6: check C1: the command 'grep' does not appear in the outline",
+    "T6: check C2: the command 'grep' does not appear in the outline",
+    "T6: check C3: the command 'grep' does not appear in the outline",
+    "T6: check C4: the command 'grep' does not appear in the outline",
+    "T6: check C7: the command 'grep' does not appear in the outline",
+    "T6: check C8: the command 'grep' does not appear in the outline",
+    "T6: check C9: the command 'grep' does not appear in the outline",
+    "T6: check C10: the command 'grep' does not appear in the outline",
+    "T6: check C11: the command 'grep' does not appear in the outline",
+    "T6: check C12: the command 'grep' does not appear in the outline"
+  ],
+  "calls": 13,
+  "prompt_tokens": 89353,
+  "completion_tokens": 26652
+}

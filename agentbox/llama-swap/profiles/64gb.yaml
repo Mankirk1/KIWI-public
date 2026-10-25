@@ -1,0 +1,44 @@
+# llama-swap profile "64gb" - Dell XPS 15 9530 with RTX 4060/4070 (8 GB VRAM) and 64 GB RAM.
+#
+#   qwen-coder      Qwen3.6-35B-A3B  UD-Q4_K_XL  (22.4 GB)  planner + coder
+#   gemma-reviewer  Gemma 4 26B-A4B  UD-Q4_K_XL  (17.0 GB)  plan critic + code reviewer
+#
+# With 64 GB both model files stay in the OS page cache, so swapping between them is
+# fast, and the larger quants keep more quality. A few expert layers can live on the
+# GPU: lower --n-cpu-moe until VRAM is nearly full (see GUIDE.md "Tuning speed").
+
+healthCheckTimeout: 900
+logLevel: info
+logToStdout: both
+startPort: 10001
+globalTTL: 0
+
+macros:
+  llama_bin: "llama-server"
+  common: >-
+    ${llama_bin} --host 127.0.0.1 --port ${PORT}
+    --jinja --flash-attn on
+    --cache-type-k q8_0 --cache-type-v q8_0
+    --parallel 1 --threads 6 --threads-batch 12
+    --n-gpu-layers 99 --metrics
+
+models:
+  qwen-coder:
+    name: "Qwen3.6-35B-A3B (UD-Q4_K_XL) - planner/coder"
+    cmd: |
+      ${common}
+      --model /models/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
+      --alias qwen-coder
+      --ctx-size 65536
+      --n-cpu-moe 38
+      --temp 0.6 --top-p 0.95 --top-k 20 --min-p 0.0
+
+  gemma-reviewer:
+    name: "Gemma 4 26B-A4B (UD-Q4_K_XL) - reviewer"
+    cmd: |
+      ${common}
+      --model /models/gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf
+      --alias gemma-reviewer
+      --ctx-size 32768
+      --cpu-moe
+      --temp 1.0 --top-p 0.95 --top-k 64

@@ -1,0 +1,380 @@
+[
+  {
+    "policy": "old",
+    "compact_at": 0.7,
+    "compact_to": 0.5,
+    "tool_clip_chars": 12000,
+    "requests": 19,
+    "compactions": 3,
+    "prompt_tokens_sent": 316670,
+    "prompt_tokens_evaluated": 64371,
+    "prompt_minutes": 34.7,
+    "generation_minutes_est": 22.2,
+    "model_minutes_est": 56.9,
+    "mean_context": 16667,
+    "max_context": 23487,
+    "mean_gen_rate": 5.86,
+    "rows": [
+      {
+        "context": 2257,
+        "evaluated": 2257,
+        "prompt_ms": 59243.786,
+        "gen_rate": 4.79,
+        "gen_ms_est": 20258.787479166665,
+        "compacted": false,
+        "wall_s": 69.5
+      },
+      {
+        "context": 8369,
+        "evaluated": 6065,
+        "prompt_ms": 145991.881,
+        "gen_rate": 8.8,
+        "gen_ms_est": 19085.181500000002,
+        "compacted": false,
+        "wall_s": 151.7
+      },
+      {
+        "context": 18869,
+        "evaluated": 10504,
+        "prompt_ms": 371222.068,
+        "gen_rate": 5.39,
+        "gen_ms_est": 9839.378229166667,
+        "compacted": false,
+        "wall_s": 380.3
+      },
+      {
+        "context": 22662,
+        "evaluated": 3746,
+        "prompt_ms": 153263.568,
+        "gen_rate": 4.86,
+        "gen_ms_est": 9050.677,
+        "compacted": false,
+        "wall_s": 162.4
+      },
+      {
+        "context": 22962,
+        "evaluated": 257,
+        "prompt_ms": 15774.166,
+        "gen_rate": 4.78,
+        "gen_ms_est": 14227.73775,
+        "compacted": false,
+        "wall_s": 25.9
+      },
+      {
+        "context": 17541,
+        "evaluated": 15288,
+        "prompt_ms": 474688.087,
+        "gen_rate": 5.36,
+        "gen_ms_est": 477732.8412083334,
+        "compacted": true,
+        "wall_s": 496.9
+      },
+      {
+        "context": 20134,
+        "evaluated": 2546,
+        "prompt_ms": 91324.508,
+        "gen_rate": 5.62,
+        "gen_ms_est": 10326.712708333334,
+        "compacted": false,
+        "wall_s": 99.9
+      },
+      {
+        "context": 22438,
+        "evaluated": 2257,
+        "prompt_ms": 92649.652,
+        "gen_rate": 5.4,
+        "gen_ms_est": 188974.65625,
+        "compacted": false,
+        "wall_s": 101.7
+      },
+      {
+        "context": 23487,
+        "evaluated": 1053,
+        "prompt_ms": 41479.46,
+        "gen_rate": 5.34,
+        "gen_ms_est": 158041.02208333334,
+        "compacted": false,
+        "wall_s": 50.6
+      },
+      {
+        "context": 10654,
+        "evaluated": 4,
+        "prompt_ms": 4454.238,
+        "gen_rate": 3.96,
+        "gen_ms_est": 13383.084104166668,
+        "compacted": true,
+        "wall_s": 24.4
+      },
+      {
+        "context": 13025,
+        "evaluated": 2324,
+        "prompt_ms": 79906.487,
+        "gen_rate": 7.23,
+        "gen_ms_est": 141929.829,
+        "compacted": false,
+        "wall_s": 86.7
+      },
+      {
+        "context": 14080,
+        "evaluated": 1008,
+        "prompt_ms": 31093.062,
+        "gen_rate": 7.12,
+        "gen_ms_est": 7441.336916666667,
+        "compacted": false,
+        "wall_s": 37.9
+      },
+      {
+        "context": 16262,
+        "evaluated": 2135,
+        "prompt_ms": 83978.728,
+        "gen_rate": 5.81,
+        "gen_ms_est": 44561.57052083333,
+        "compacted": false,
+        "wall_s": 92.3
+      },
+      {
+        "context": 17045,
+        "evaluated": 787,
+        "prompt_ms": 29366.813,
+        "gen_rate": 6.5,
+        "gen_ms_est": 88025.61624999999,
+        "compacted": false,
+        "wall_s": 36.8
+      },
+      {
+        "context": 17646,
+        "evaluated": 605,
+        "prompt_ms": 23097.013,
+        "gen_rate": 6.14,
+        "gen_ms_est": 8629.0061875,
+        "compacted": false,
+        "wall_s": 31.0
+      },
+      {
+        "context": 17773,
+        "evaluated": 80,
+        "prompt_ms": 5543.532,
+        "gen_rate": 5.64,
+        "gen_ms_est": 11342.948,
+        "compacted": false,
+        "wall_s": 14.1
+      },
+      {
+        "context": 17891,
+        "evaluated": 71,
+        "prompt_ms": 5307.324,
+        "gen_rate": 6.25,
+        "gen_ms_est": 42101.40710416667,
+        "compacted": false,
+        "wall_s": 13.1
+      },
+      {
+        "context": 18298,
+        "evaluated": 360,
+        "prompt_ms": 13206.845,
+        "gen_rate": 6.14,
+        "gen_ms_est": 7497.721,
+        "compacted": false,
+        "wall_s": 20.8
+      },
+      {
+        "context": 15277,
+        "evaluated": 13024,
+        "prompt_ms": 357541.063,
+        "gen_rate": 6.15,
+        "gen_ms_est": 61627.63452083333,
+        "compacted": true,
+        "wall_s": 372.7
+      }
+    ]
+  },
+  {
+    "policy": "new",
+    "compact_at": 0.5,
+    "compact_to": 0.25,
+    "tool_clip_chars": "8000",
+    "requests": 19,
+    "compactions": 4,
+    "prompt_tokens_sent": 233841,
+    "prompt_tokens_evaluated": 61236,
+    "prompt_minutes": 27.7,
+    "generation_minutes_est": 17.0,
+    "model_minutes_est": 44.7,
+    "mean_context": 12307,
+    "max_context": 17392,
+    "mean_gen_rate": 7.65,
+    "rows": [
+      {
+        "context": 2257,
+        "evaluated": 2257,
+        "prompt_ms": 57066.54,
+        "gen_rate": 8.84,
+        "gen_ms_est": 10968.392208333333,
+        "compacted": false,
+        "wall_s": 62.9
+      },
+      {
+        "context": 7281,
+        "evaluated": 4977,
+        "prompt_ms": 117131.928,
+        "gen_rate": 8.69,
+        "gen_ms_est": 19337.1535,
+        "compacted": false,
+        "wall_s": 122.8
+      },
+      {
+        "context": 16327,
+        "evaluated": 9050,
+        "prompt_ms": 263293.376,
+        "gen_rate": 6.59,
+        "gen_ms_est": 8037.861854166666,
+        "compacted": false,
+        "wall_s": 270.7
+      },
+      {
+        "context": 14153,
+        "evaluated": 11900,
+        "prompt_ms": 312700.183,
+        "gen_rate": 7.1,
+        "gen_ms_est": 6194.037666666666,
+        "compacted": true,
+        "wall_s": 321.4
+      },
+      {
+        "context": 14453,
+        "evaluated": 304,
+        "prompt_ms": 10423.822,
+        "gen_rate": 7.13,
+        "gen_ms_est": 9540.239916666667,
+        "compacted": false,
+        "wall_s": 17.2
+      },
+      {
+        "context": 14799,
+        "evaluated": 350,
+        "prompt_ms": 11947.804,
+        "gen_rate": 7.04,
+        "gen_ms_est": 364305.88791666663,
+        "compacted": false,
+        "wall_s": 18.8
+      },
+      {
+        "context": 17392,
+        "evaluated": 2597,
+        "prompt_ms": 94039.038,
+        "gen_rate": 6.61,
+        "gen_ms_est": 8768.198333333332,
+        "compacted": false,
+        "wall_s": 102.4
+      },
+      {
+        "context": 10644,
+        "evaluated": 8391,
+        "prompt_ms": 212486.105,
+        "gen_rate": 8.37,
+        "gen_ms_est": 121791.52750000001,
+        "compacted": true,
+        "wall_s": 223.8
+      },
+      {
+        "context": 11693,
+        "evaluated": 1053,
+        "prompt_ms": 31410.406,
+        "gen_rate": 8.23,
+        "gen_ms_est": 102608.10433333334,
+        "compacted": false,
+        "wall_s": 37.3
+      },
+      {
+        "context": 12566,
+        "evaluated": 826,
+        "prompt_ms": 27055.15,
+        "gen_rate": 7.79,
+        "gen_ms_est": 6803.7877708333335,
+        "compacted": false,
+        "wall_s": 33.3
+      },
+      {
+        "context": 14929,
+        "evaluated": 2316,
+        "prompt_ms": 72602.449,
+        "gen_rate": 7.27,
+        "gen_ms_est": 141223.406625,
+        "compacted": false,
+        "wall_s": 79.3
+      },
+      {
+        "context": 9925,
+        "evaluated": 7672,
+        "prompt_ms": 189520.417,
+        "gen_rate": 7.87,
+        "gen_ms_est": 6733.483270833333,
+        "compacted": true,
+        "wall_s": 199.8
+      },
+      {
+        "context": 12053,
+        "evaluated": 2081,
+        "prompt_ms": 60017.972,
+        "gen_rate": 7.86,
+        "gen_ms_est": 32950.1580625,
+        "compacted": false,
+        "wall_s": 66.2
+      },
+      {
+        "context": 12836,
+        "evaluated": 787,
+        "prompt_ms": 24656.814,
+        "gen_rate": 7.22,
+        "gen_ms_est": 79201.39608333334,
+        "compacted": false,
+        "wall_s": 31.4
+      },
+      {
+        "context": 13437,
+        "evaluated": 605,
+        "prompt_ms": 20500.42,
+        "gen_rate": 7.55,
+        "gen_ms_est": 7023.9210625,
+        "compacted": false,
+        "wall_s": 26.9
+      },
+      {
+        "context": 13564,
+        "evaluated": 80,
+        "prompt_ms": 7601.526,
+        "gen_rate": 7.48,
+        "gen_ms_est": 8553.119999999999,
+        "compacted": false,
+        "wall_s": 14.1
+      },
+      {
+        "context": 13682,
+        "evaluated": 71,
+        "prompt_ms": 4717.77,
+        "gen_rate": 7.68,
+        "gen_ms_est": 34256.221208333336,
+        "compacted": false,
+        "wall_s": 11.0
+      },
+      {
+        "context": 14089,
+        "evaluated": 411,
+        "prompt_ms": 14005.652,
+        "gen_rate": 7.61,
+        "gen_ms_est": 6047.593,
+        "compacted": false,
+        "wall_s": 20.1
+      },
+      {
+        "context": 7761,
+        "evaluated": 5508,
+        "prompt_ms": 131657.135,
+        "gen_rate": 8.43,
+        "gen_ms_est": 44951.816125,
+        "compacted": true,
+        "wall_s": 142.2
+      }
+    ]
+  }
+]

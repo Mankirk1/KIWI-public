@@ -1,0 +1,109 @@
+name: agentbox
+
+on:
+  push:
+    branches: [main]
+    paths: ["agentbox/**", ".claude/**", ".github/workflows/agentbox.yml"]
+  pull_request:
+    paths: ["agentbox/**", ".claude/**", ".github/workflows/agentbox.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentbox-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit + end-to-end tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: agentbox
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: pip install "pydantic>=2.6,<3" "pyyaml>=6" "pathspec>=0.12" "mcp>=1.10,<3"
+      - name: Install orchestrator package
+        run: pip install -e orchestrator
+      - name: Tests (orchestrator, worker, guard, MCP bridge, simulated GitHub + models)
+        run: python -m unittest discover -s tests -v
+      - name: Shell scripts parse
+        run: bash -n scripts/*.sh
+
+  containers:
+    name: Real containers (worker image, sandbox, egress proxy, model server)
+    runs-on: ubuntu-latest
+    needs: unit
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: agentbox
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install "pydantic>=2.6,<3" "pyyaml>=6" "pathspec>=0.12" "mcp>=1.10,<3"
+
+      - name: Validate compose files (GPU and CPU variants)
+        run: |
+          cp .env.example .env
+          sed -i "s#^MODELS_DIR=.*#MODELS_DIR=$RUNNER_TEMP/models#" .env
+          mkdir -p "$RUNNER_TEMP/models"
+          docker compose -f docker-compose.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.cpu.yml config -q
+          docker compose config | grep -q "llama-swap:cpu"
+
+      - name: Build the worker image
+        run: scripts/build-worker.sh
+
+      - name: Sandbox tests (worker + test runner in hardened containers)
+        env:
+          AGENTBOX_DOCKER_TESTS: "1"
+          AGENTBOX_TEST_IMAGE: agentbox-worker:latest
+        run: python -m unittest tests.test_docker_sandbox -v 2>&1 | tee "$RUNNER_TEMP/ci-sandbox.log"; exit ${PIPESTATUS[0]}
+
+      - name: Start the egress proxy (creates the internal network)
+        run: |
+          docker compose up -d egress-proxy
+          ok=0
+          for i in $(seq 1 30); do
+            if docker compose exec -T egress-proxy grep -qi "Accepting HTTP" /var/log/squid/cache.log 2>/dev/null; then ok=1; break; fi
+            sleep 2
+          done
+          docker compose ps
+          bash scripts/proxy-log.sh cache 2>&1 | tail -40 | tee "$RUNNER_TEMP/ci-proxy-start.log" || true
+          test "$ok" = 1
+
+      - name: Egress allowlist is enforced
+        env:
+          AGENTBOX_PROXY_TESTS: "1"
+          AGENTBOX_TEST_IMAGE: agentbox-worker:latest
+        run: python -m unittest tests.test_proxy_live -v 2>&1 | tee "$RUNNER_TEMP/ci-proxy-tests.log"; exit ${PIPESTATUS[0]}
+
+      - name: Model server starts with the 32gb-cpu profile (no models loaded)
+        if: ${{ !cancelled() }}
+        run: |
+          exec > >(tee "$RUNNER_TEMP/ci-model-server.log") 2>&1
+          bash scripts/select-profile.sh 32gb-cpu
+          sed -i "s#^MODELS_DIR=.*#MODELS_DIR=$RUNNER_TEMP/models#" .env
+          docker compose up -d llama-swap
+          for i in $(seq 1 60); do curl -sf localhost:8080/health && break; sleep 3; done
+          echo; curl -sf localhost:8080/v1/models | tee /tmp/models.json
+          grep -q '"qwen-coder"' /tmp/models.json && grep -q '"gemma-reviewer"' /tmp/models.json
+          docker compose exec -T llama-swap sh -c 'command -v llama-server && llama-server --version' || true
+
+      - name: Report failures as annotations
+        if: failure()
+        run: python tests/ci/annotate.py . || true
